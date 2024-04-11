@@ -6,10 +6,14 @@ name: Build and Publish to Nuget registry
 on:
   push:
     branches: [ "master" ]
-    paths: 'AIGatewayDotNet.Sdk/**'
+    paths:
+      - 'AIGatewayDotNet.Sdk/**'
+      - '.github/workflows/build-and-publish.yml'
   pull_request:
     branches: [ "master" ]
-    paths: 'AIGatewayDotNet.Sdk/**'
+    paths:
+      - 'AIGatewayDotNet.Sdk/**'
+      - '.github/workflows/build-and-publish.yml'
 
 jobs:
   build:
