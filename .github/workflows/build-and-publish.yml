@@ -1,0 +1,28 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Build and Publish to Nuget registry
+
+on:
+  push:
+    branches: [ "master" ]
+    paths: 'AIGatewayDotNet.Sdk/**'
+  pull_request:
+    branches: [ "master" ]
+    paths: 'AIGatewayDotNet.Sdk/**'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore AIGatewayDotNet.Sdk/AIGatewayDotNet.Sdk.csproj
+    - name: Build
+      run: dotnet build --no-restore AIGatewayDotNet.Sdk/AIGatewayDotNet.Sdk.csproj
