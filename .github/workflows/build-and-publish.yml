@@ -4,32 +4,82 @@
 name: Build and Publish to Nuget registry
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "master" ]
     paths:
       - 'AIGatewayDotNet.Sdk/**'
       - '.github/workflows/build-and-publish.yml'
   pull_request:
-    branches: [ "master" ]
+    branches: [ "*" ]
     paths:
       - 'AIGatewayDotNet.Sdk/**'
       - '.github/workflows/build-and-publish.yml'
+  release:
+    types:
+      - published
+
+env:
+  PROJECT_FILE_PATH: AIGatewayDotNet.Sdk/AIGatewayDotNet.Sdk.csproj
+  NUGET_DIR: ${{ github.workspace }}/Release
 
 jobs:
-  build:
-
+  create_nuget_package:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-      with: 
-        fetch-depth: 0
-        filter: tree:0
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    - name: Restore dependencies
-      run: dotnet restore AIGatewayDotNet.Sdk/AIGatewayDotNet.Sdk.csproj
-    - name: Build
-      run: dotnet build --no-restore AIGatewayDotNet.Sdk/AIGatewayDotNet.Sdk.csproj
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: tree:0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+
+      - name: Create Nuget directory
+        run: dotnet pack --configuration Release --output ${{ env.NUGET_DIR }} ${{ env.PROJECT_FILE_PATH }}
+
+      - name: Publish as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package
+          if-no-files-found: error
+          retention-days: 7
+          path: ${{ env.NUGET_DIR }}/*.nupkg
+  
+  validate_nuget_package:
+    runs-on: ubuntu-latest
+    needs: create_nuget_package
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+
+      - name: Download Nuget package
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-package
+          path: ${{ env.NUGET_DIR }}
+
+      - name: Install nuget validator
+        run: dotnet tool update Meziantou.Framework.NuGetPackageValidation.Tool --global
+      - name: Validate package
+        run: meziantou.validate-nuget-package (Get-ChildItem "${{ env.NUGET_DIR }}/*.nupkg")
+  
+  deploy:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    needs: [ validate_nuget_package ]
+    steps:
+      - name: Download Nuget package
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-package
+          path: ${{ env.NUGET_DIR }}
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+
+      - name: Publish NuGet package
+        run: |
+          foreach($file in (Get-ChildItem "${{ env.NUGET_DIR }}" -Recurse -Include *.nupkg)) {
+              dotnet nuget push $file --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }
