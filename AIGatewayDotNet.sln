@@ -4,6 +4,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIGatewayDotNet.Sdk", "AIGa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIGatewayDotNet.Playground", "AIGatewayDotNet.Playground\AIGatewayDotNet.Playground.csproj", "{E3C079F4-D6D2-44CC-8E78-0E7C22F7F227}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{FE5920C4-96CE-458D-8FD8-EF530954617D}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build-and-publish.yml = .github\workflows\build-and-publish.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
