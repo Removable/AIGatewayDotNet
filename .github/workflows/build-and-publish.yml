@@ -46,7 +46,7 @@ jobs:
           path: ${{ env.NUGET_DIR }}/*.nupkg
   
   validate_nuget_package:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: create_nuget_package
     steps:
       - name: Setup .NET
@@ -61,11 +61,11 @@ jobs:
       - name: Install nuget validator
         run: dotnet tool update Meziantou.Framework.NuGetPackageValidation.Tool --global
       - name: Validate package
-        run: meziantou.validate-nuget-package (Get-ChildItem "${{ env.NUGET_DIR }}/*.nupkg")[0].FullName
+        run: meziantou.validate-nuget-package (Get-ChildItem "${{ env.NUGET_DIR }}/*.nupkg")
   
   deploy:
     if: github.event_name == 'release'
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: [ validate_nuget_package ]
     steps:
       - name: Download Nuget package
