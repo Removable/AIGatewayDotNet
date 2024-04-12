@@ -63,7 +63,7 @@ jobs:
       - name: Validate package
         run: |
           foreach($file in (Get-ChildItem "${{ env.NUGET_DIR }}" -Recurse -Include *.nupkg)) {
-              meziantou.validate-nuget-package $file
+              meziantou.validate-nuget-package "$file"
           }
   
   deploy:
