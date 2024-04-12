@@ -21,7 +21,7 @@ on:
 
 env:
   PROJECT_FILE_PATH: AIGatewayDotNet.Sdk/AIGatewayDotNet.Sdk.csproj
-  NUGET_DIR: ${{ github.workspace }}/Release
+  NUGET_DIR: Release
 
 jobs:
   create_nuget_package:
