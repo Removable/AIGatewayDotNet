@@ -3,25 +3,25 @@
 
 name: Build and Publish to Nuget registry
 
+env:
+  PROJECT_DIR: AIGatewayDotNet.Sdk
+  PROJECT_FILE_NAME: AIGatewayDotNet.Sdk.csproj
+  NUGET_DIR: Release
+
 on:
   workflow_dispatch:
   push:
     branches: [ "master" ]
     paths:
-      - 'AIGatewayDotNet.Sdk/**'
+      - '${{ env.PROJECT_DIR }}/**'
       - '.github/workflows/build-and-publish.yml'
   pull_request:
-    branches: [ "*" ]
     paths:
-      - 'AIGatewayDotNet.Sdk/**'
+      - '${{ env.PROJECT_DIR }}/**'
       - '.github/workflows/build-and-publish.yml'
   release:
     types:
       - published
-
-env:
-  PROJECT_FILE_PATH: AIGatewayDotNet.Sdk/AIGatewayDotNet.Sdk.csproj
-  NUGET_DIR: Release
 
 jobs:
   create_nuget_package:
@@ -35,7 +35,7 @@ jobs:
         uses: actions/setup-dotnet@v4
 
       - name: Create Nuget directory
-        run: dotnet pack --configuration Release --output ${{ env.NUGET_DIR }} ${{ env.PROJECT_FILE_PATH }}
+        run: dotnet pack --configuration Release --output ${{ env.NUGET_DIR }} ${{ env.PROJECT_DIR }}/${{ env.PROJECT_FILE_NAME }}
 
       - name: Publish as an artifact
         uses: actions/upload-artifact@v4
