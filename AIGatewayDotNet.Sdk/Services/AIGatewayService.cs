@@ -16,6 +16,8 @@ public class AIGatewayService : IAIGatewayService
 
     public AIGatewayService(HttpClient httpClient, IOptions<AIGatewayOptions> options)
     {
+        options.Value.Validate();
+        
         _httpClient = httpClient;
         _httpClient.BaseAddress =
             new Uri(
