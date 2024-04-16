@@ -4,6 +4,7 @@ using System.Text.Json;
 using AIGatewayDotNet.Sdk.Extensions;
 using AIGatewayDotNet.Sdk.Interfaces;
 using AIGatewayDotNet.Sdk.Models.Chat;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace AIGatewayDotNet.Sdk.Services;
@@ -11,37 +12,43 @@ namespace AIGatewayDotNet.Sdk.Services;
 public class AIGatewayService : IAIGatewayService
 {
     private readonly HttpClient _httpClient;
-    private readonly IOptions<AIGatewayOptions> _options;
+    private readonly AIGatewayOptions _options;
     private readonly IEndpointProvider _endpointProvider;
-
-    public AIGatewayService(HttpClient httpClient, IOptions<AIGatewayOptions> options)
+    
+    [ActivatorUtilitiesConstructor]
+    public AIGatewayService(IOptions<AIGatewayOptions> options, HttpClient httpClient)
+        : this(options.Value, httpClient)
     {
-        options.Value.Validate();
-        
+    }
+
+    public AIGatewayService(AIGatewayOptions options, HttpClient? httpClient = null)
+    {
+        options.Validate();
+
         _httpClient = httpClient;
         _httpClient.BaseAddress =
             new Uri(
-                $"{StaticValues.GatewayStatics.CloudFlareGatewayBaseUrl}/{options.Value.CloudFlareGatewayVersion}/{options.Value.CloudFlareAccountTag}/");
+                $"{StaticValues.GatewayStatics.CloudFlareGatewayBaseUrl}/{options.CloudFlareGatewayVersion}/{options.CloudFlareAccountTag}/");
 
-        switch (options.Value.Provider.ToLower())
+        switch (options.Provider.ToLower())
         {
             case StaticValues.Providers.Azure:
-                _httpClient.DefaultRequestHeaders.Add("api-key", options.Value.ApiKey);
-                _endpointProvider = new AzureEndpointProvider(options.Value.CloudFlareGateway,
-                    options.Value.AzureResourceName!, options.Value.AzureApiVersion!);
+                _httpClient.DefaultRequestHeaders.Add("api-key", options.ApiKey);
+                _endpointProvider = new AzureEndpointProvider(options.CloudFlareGateway,
+                    options.AzureResourceName!, options.AzureApiVersion!);
                 break;
             case StaticValues.Providers.OpenAi:
-                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.Value.ApiKey}");
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.ApiKey}");
                 _endpointProvider = new OpenAiEndpointProvider();
-                if (!string.IsNullOrWhiteSpace(options.Value.OpenAiOrganization))
+                if (!string.IsNullOrWhiteSpace(options.OpenAiOrganization))
                 {
-                    _httpClient.DefaultRequestHeaders.Add("OpenAI-Organization", options.Value.OpenAiOrganization);
+                    _httpClient.DefaultRequestHeaders.Add("OpenAI-Organization", options.OpenAiOrganization);
                 }
 
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(options.Value.Provider),
-                    $"Provider {options.Value.Provider} is not supported.");
+                throw new ArgumentOutOfRangeException(nameof(options.Provider),
+                    $"Provider {options.Provider} is not supported.");
         }
 
         _options = options;
@@ -49,7 +56,7 @@ public class AIGatewayService : IAIGatewayService
 
     private string GetChatCompletionRequestUri(string model)
     {
-        if (_options.Value.Provider == StaticValues.Providers.Azure)
+        if (_options.Provider == StaticValues.Providers.Azure)
             return _endpointProvider.ChatCompletionCreate()
                 .Replace(StaticValues.GatewayStatics.AzureModelPlacehoder, model);
 

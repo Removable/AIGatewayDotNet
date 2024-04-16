@@ -44,23 +44,40 @@ The service will bind the configuration automatically.
 ### Add multiple services
 
 Add a separate configuration for each service with a different field name. For example:
-
 ```json
 "OpenAI": {
   "CloudFlareAccountTag": "Your CloudFlare Account Tag goes here",
-  // ...
+  // Other fields
 },
 "Azure": {
   "CloudFlareAccountTag": "Your CloudFlare Account Tag goes here",
-  // ...
+  // Other fields
+}
+```
+
+Then, create a service for each configuration:
+```csharp
+public class OpenAIService : AIGatewayService
+{
+    public const string SettingKey = "OpenAI";
+    [ActivatorUtilitiesConstructor]
+    public AIGatewayService(HttpClient httpClient, IOptionsSnapshot<OpenAiOptions> settings) : base(settings.Get(SettingKey),httpClient){}
+    public AIGatewayService(OpenAiOptions settings, HttpClient? httpClient = null) : base(settings, httpClient){}
+}
+
+public class AzureService : AIGatewayService
+{
+    public const string SettingKey = "Azure";
+    [ActivatorUtilitiesConstructor]
+    public AIGatewayService(HttpClient httpClient, IOptionsSnapshot<AzureOptions> settings) : base(settings.Get(SettingKey),httpClient){}
+    public AIGatewayService(AzureOptions settings, HttpClient? httpClient = null) : base(settings, httpClient){}
 }
 ```
 
 Then, add the services to your project:
-
 ```csharp
-services.AddAIGatewayService("OpenAI");
-services.AddAIGatewayService("Azure");
+services.AddAIGatewayService<OpenAIService>(OpenAIService.SettingKey);
+services.AddAIGatewayService<AzureService>(AzureService.SettingKey);
 ```
 
 ### Use the service
@@ -68,7 +85,16 @@ services.AddAIGatewayService("Azure");
 Get the service from the DI container:
 
 ```csharp
+// If you have a single service
 var gatewayService = serviceProvider.GetRequiredService<IAIGatewayService>();
+```
+
+or
+
+```csharp
+// If you have multiple services
+var openAiGateway = serviceProvider.GetRequiredService<OpenAIService>();
+var azureGateway = serviceProvider.GetRequiredService<AzureService>();
 ```
 
 Then, use the service to make requests:
