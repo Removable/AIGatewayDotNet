@@ -45,13 +45,15 @@ The service will bind the configuration automatically.
 
 Add a separate configuration for each service with a different field name. For example:
 ```json
-"OpenAI": {
-  "CloudFlareAccountTag": "Your CloudFlare Account Tag goes here",
-  // Other fields
-},
-"Azure": {
-  "CloudFlareAccountTag": "Your CloudFlare Account Tag goes here",
-  // Other fields
+"AIGatewayOptions": {
+  "OpenAI": {
+    "CloudFlareAccountTag": "Your CloudFlare Account Tag goes here",
+    // Other fields
+  },
+  "Azure": {
+    "CloudFlareAccountTag": "Your CloudFlare Account Tag goes here",
+    // Other fields
+  }
 }
 ```
 
