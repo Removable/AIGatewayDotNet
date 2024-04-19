@@ -14,7 +14,7 @@ public class AIGatewayService : IAIGatewayService
     private readonly HttpClient _httpClient;
     private readonly AIGatewayOptions _options;
     private readonly IEndpointProvider _endpointProvider;
-    
+
     [ActivatorUtilitiesConstructor]
     public AIGatewayService(IOptions<AIGatewayOptions> options, HttpClient httpClient)
         : this(options.Value, httpClient)
@@ -28,14 +28,13 @@ public class AIGatewayService : IAIGatewayService
         _httpClient = httpClient;
         _httpClient.BaseAddress =
             new Uri(
-                $"{StaticValues.GatewayStatics.CloudFlareGatewayBaseUrl}/{options.CloudFlareGatewayVersion}/{options.CloudFlareAccountTag}/");
+                $"{StaticValues.GatewayStatics.CloudFlareGatewayBaseUrl}/{options.CloudFlareGatewayVersion}/{options.CloudFlareAccountTag}/{options.CloudFlareGateway}/");
 
         switch (options.Provider.ToLower())
         {
             case StaticValues.Providers.Azure:
                 _httpClient.DefaultRequestHeaders.Add("api-key", options.ApiKey);
-                _endpointProvider = new AzureEndpointProvider(options.CloudFlareGateway,
-                    options.AzureResourceName!, options.AzureApiVersion!);
+                _endpointProvider = new AzureEndpointProvider(options.AzureResourceName!, options.AzureApiVersion!);
                 break;
             case StaticValues.Providers.OpenAi:
                 _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.ApiKey}");
