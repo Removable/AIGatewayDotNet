@@ -124,8 +124,6 @@ public class StaticValues
         
         public static string AzureModelPlacehoder => "${model}";
         
-        public static string OpenAiGateway => "openai-gateway";
-        
         public static string ProviderAzure=> "azure-openai";
         
         public static string ProviderOpenAi => "openai";
