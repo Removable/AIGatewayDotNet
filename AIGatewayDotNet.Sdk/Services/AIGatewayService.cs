@@ -56,7 +56,7 @@ public class AIGatewayService : IAIGatewayService
 
     private string GetChatCompletionRequestUri(string model)
     {
-        if (_options.Provider == StaticValues.Providers.Azure)
+        if (string.Equals(_options.Provider, StaticValues.Providers.Azure, StringComparison.CurrentCultureIgnoreCase))
             return _endpointProvider.ChatCompletionCreate()
                 .Replace(StaticValues.GatewayStatics.AzureModelPlacehoder, HttpUtility.UrlEncode(model));
 
