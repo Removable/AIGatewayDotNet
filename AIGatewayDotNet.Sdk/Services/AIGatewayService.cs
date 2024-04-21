@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 using AIGatewayDotNet.Sdk.Extensions;
 using AIGatewayDotNet.Sdk.Interfaces;
 using AIGatewayDotNet.Sdk.Models.Chat;
@@ -57,7 +58,7 @@ public class AIGatewayService : IAIGatewayService
     {
         if (_options.Provider == StaticValues.Providers.Azure)
             return _endpointProvider.ChatCompletionCreate()
-                .Replace(StaticValues.GatewayStatics.AzureModelPlacehoder, model);
+                .Replace(StaticValues.GatewayStatics.AzureModelPlacehoder, HttpUtility.UrlEncode(model));
 
         return _endpointProvider.ChatCompletionCreate();
     }
