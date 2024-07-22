@@ -89,6 +89,24 @@ public class AIGatewayService : IAIGatewayService
         using var response = _httpClient.PostAsStreamAsync(
             GetChatCompletionRequestUri(chatCompletionCreateRequest.Model), chatCompletionCreateRequest,
             cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var message = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new Exception("Failed to get chat completion");
+            }
+
+            var chatCompletionResponse = JsonSerializer.Deserialize<ChatCompletionResponse>(message);
+            if (chatCompletionResponse == null)
+            {
+                throw new Exception("Failed to get chat completion");
+            }
+
+            yield return chatCompletionResponse;
+        }
+
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var reader = new StreamReader(stream);
 

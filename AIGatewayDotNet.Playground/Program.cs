@@ -33,6 +33,11 @@ var chatCompletionCreateRequest = new ChatCompletionCreateRequest
 var streamResponse = gatewayService.ChatCompletionCreateStream(chatCompletionCreateRequest);
 await foreach (var res in streamResponse)
 {
+    if (res.Error != null)
+    {
+        Console.WriteLine($"Error: {res.Error.Message}");
+        break;
+    }
     Console.WriteLine($"Response: {res.Choices.FirstOrDefault()?.Delta?.Content}");
 }
 
